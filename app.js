@@ -1,7 +1,7 @@
 (async()=>{await CollagePlanet.ready;
 const thumbnailCache=new Map();
 const views=[...document.querySelectorAll('.view')];
-const state={name:'俊宝',species:'鸟',hint:0,x:0,y:0,dragging:false,focused:false,justFocused:0,startX:0,startY:0,records:[],activeId:null};
+const state={name:'俊宝',species:'鸟',hint:0,x:0,y:0,dragging:false,focused:false,justFocused:0,startX:0,startY:0,records:[],encounters:[],activeId:null};
 const constellationData={
   '鸟':{name:'飞鸟座',group:'鸟星群',clue:'展开翅膀的小鸟',points:[[50,41],[37,37],[21,24],[7,36],[25,47],[63,37],[79,24],[93,36],[75,47],[50,58],[41,75],[50,67],[59,75]],edges:[[0,1],[1,2],[2,3],[1,4],[0,5],[5,6],[6,7],[5,8],[0,9],[9,10],[9,11],[11,12]]},
   '猫':{name:'眠猫座',group:'猫星群',clue:'竖起耳朵的小猫',points:[[50,44],[31,31],[22,10],[43,25],[57,25],[78,10],[69,31],[72,56],[61,69],[50,73],[39,69],[28,56],[40,47],[60,47]],edges:[[0,3],[3,2],[2,1],[1,11],[11,10],[10,9],[9,8],[8,7],[7,6],[6,5],[5,4],[4,0],[12,13]]},
@@ -13,6 +13,7 @@ const constellationData={
 };
 const svgNS='http://www.w3.org/2000/svg';
 const storageKey='among-the-stars-memorials-v1';
+const encounterKey='among-the-stars-encounters-v1';
 const defaultRecord={id:'junbao-demo',name:'俊宝',species:'鸟',breed:'玄凤鹦鹉',memory:'她以前最喜欢在秋千上睡觉。',words:'稳如泰山的鸟妈妈。',createdAt:'13 SEP',skyIndex:0};
 const worldAssets={'鸟':'world-bird.webp','猫':'world-cat.webp','狗':'world-dog.webp','兔子':'world-rabbit.webp','仓鼠':'world-hamster.webp','鱼':'world-fish.webp','其他':'world-other.webp'};
 const stickerSheets={cats:'./assets/pet-stickers-cats-dogs.webp',birds:'./assets/pet-stickers-birds-rabbits.webp',small:'./assets/pet-stickers-small-fish.webp'};
@@ -43,7 +44,11 @@ const skyPositions=[
 function normalizeRecords(records){return records.map((record,index)=>{const constellation=constellationData[record.species]||constellationData['其他'];return {...record,skyIndex:Number.isInteger(record.skyIndex)?record.skyIndex:index%6,pointIndex:Number.isInteger(record.pointIndex)?record.pointIndex:(index*4)%constellation.points.length}})}
 function loadRecords(){try{const saved=JSON.parse(localStorage.getItem(storageKey)||'null');if(Array.isArray(saved))return normalizeRecords(saved)}catch{}return[]}
 function saveRecords(){try{localStorage.setItem(storageKey,JSON.stringify(state.records))}catch{alert('这台设备的保存空间不足，请先备份已有作品，再减少照片大小重试。')}}
+function loadEncounters(){try{const saved=JSON.parse(localStorage.getItem(encounterKey)||'null');if(!Array.isArray(saved))return[];const known=new Set(communityRecords.map(record=>record.id));return saved.filter(item=>known.has(item?.recordId)&&Number.isFinite(Date.parse(item.firstSeenAt))&&Number.isFinite(Date.parse(item.lastSeenAt))&&Number.isInteger(item.visitCount)&&item.visitCount>0)}catch{return[]}}
+function saveEncounters(){localStorage.setItem(encounterKey,JSON.stringify(state.encounters))}
+function recordEncounter(record){if(!record.isCommunity)return;const now=new Date().toISOString(),existing=state.encounters.find(item=>item.recordId===record.id);if(existing){existing.lastSeenAt=now;existing.visitCount+=1}else state.encounters.push({recordId:record.id,firstSeenAt:now,lastSeenAt:now,visitCount:1});try{saveEncounters()}catch{alert('这台设备的保存空间不足，本次偶遇暂时无法写入观星手册。')}renderEncounters()}
 state.records=loadRecords();
+state.encounters=loadEncounters();
 state.activeId=state.records.at(-1)?.id||communityRecords[0].id;
 saveRecords();
 const catDoodleSample={id:'cat-doodle-sample',name:'猫咪样例',species:'猫',breed:'',memory:'抬起后腿，闭着眼睛，把头轻轻仰起来。',words:'照片里的这个小小瞬间。',createdAt:'贴纸预览',skyIndex:17,pointIndex:8,doodle:'./assets/cat-doodle-sticker.webp',isSample:true};
@@ -125,7 +130,7 @@ function updateIdentity(){
 }
 
 function activateRecord(id){state.activeId=id;updateIdentity();renderJournal()}
-function activateNextRecord(){const records=allSearchRecords();const currentIndex=Math.max(0,records.findIndex(record=>record.id===state.activeId));const next=records[(currentIndex+1)%records.length];activateRecord(next.id)}
+function activateNextRecord(){const seen=new Set(state.encounters.map(item=>item.recordId));const unseen=communityRecords.find(record=>record.id!==state.activeId&&!seen.has(record.id));if(unseen){activateRecord(unseen.id);return}const records=allSearchRecords();const currentIndex=Math.max(0,records.findIndex(record=>record.id===state.activeId));activateRecord(records[(currentIndex+1)%records.length].id)}
 function continueObservation(){activateNextRecord();resumeSearch=false;show('search')}
 function applySticker(el,record){
   if(record.doodle){el.className='star-avatar doodle-avatar';el.style.backgroundImage=`url('${record.doodle}')`;return}
@@ -136,10 +141,10 @@ function applySticker(el,record){
 function makeStamp(record,{community=false}={}){
   const data=constellationData[record.species]||constellationData['其他'];
   const button=document.createElement('button');button.type='button';button.className=`star-entry${!community&&record.id===state.activeId?' is-current':''}`;
-  button.dataset.recordId=record.id;const mark=document.createElement('span');mark.className='stamp-mark';mark.textContent=community?'示例星球':'我的星星';
+  button.dataset.recordId=record.id;const mark=document.createElement('span');mark.className='stamp-mark';mark.textContent=community?'今夜遇见':'我的星星';
   const sticker=document.createElement('img');sticker.className='journal-planet';sticker.alt=record.name+'的星球';sticker.src=planetThumbnail(record);
   const name=document.createElement('h3');name.textContent=record.name;
-  const location=document.createElement('span');location.textContent=`${data.name} · ${record.createdAt||record.date||''}`;
+  const location=document.createElement('span');const encounter=state.encounters.find(item=>item.recordId===record.id);location.textContent=community&&encounter?`${data.name} · ${formatEncounterDate(encounter.lastSeenAt)}`:`${data.name} · ${record.createdAt||record.date||''}`;
   button.append(mark,sticker,name,location);
   if(community){button.setAttribute('aria-label',`查看今夜遇见的${record.name}`);button.addEventListener('click',()=>renderEncounter(record))}
   else{button.setAttribute('aria-label',`查看${record.name}的观星笔记`);button.addEventListener('click',()=>{activateRecord(record.id);updateCarouselPage('star-list')})}
@@ -152,8 +157,9 @@ function renderJournal(){document.getElementById('visit-direct').hidden=!current
   list.scrollLeft=scroll;updateCarouselPage('star-list');
 }
 document.getElementById('preview-cat-doodle')?.addEventListener('click',()=>{activateRecord(catDoodleSample.id);show('world')});
-function renderEncounters(){const grid=document.getElementById('encounter-grid');grid.replaceChildren();communityRecords.forEach(record=>grid.append(makeStamp(record,{community:true})));updateCarouselPage('encounter-grid');renderEncounter(communityRecords[0])}
-function renderEncounter(record){const data=constellationData[record.species]||constellationData['其他'];const note=document.getElementById('encounter-note');note.querySelector('span').textContent=`TONIGHT · ${data.group} · ${record.date}`;note.querySelector('h3').textContent=`${record.name} · ${record.breed}`;note.querySelector('p').textContent=`${record.memory} “${record.words}”`;const searchButton=document.getElementById('encounter-search');searchButton.hidden=false;searchButton.dataset.recordId=record.id;document.querySelectorAll('#encounter-grid .star-entry').forEach(b=>b.classList.toggle('is-current',b.dataset.recordId===record.id))}
+function formatEncounterDate(value){return new Intl.DateTimeFormat('zh-CN',{month:'numeric',day:'numeric',hour:'2-digit',minute:'2-digit'}).format(new Date(value))}
+function renderEncounters(){const grid=document.getElementById('encounter-grid'),nav=document.getElementById('encounter-nav'),note=document.getElementById('encounter-note'),empty=document.getElementById('empty-encounters');grid.replaceChildren();const items=state.encounters.map(encounter=>({encounter,record:communityRecords.find(record=>record.id===encounter.recordId)})).filter(item=>item.record).sort((a,b)=>Date.parse(b.encounter.lastSeenAt)-Date.parse(a.encounter.lastSeenAt));empty.hidden=items.length>0;grid.hidden=!items.length;nav.hidden=!items.length;note.hidden=!items.length;if(!items.length){document.getElementById('encounter-page').textContent='0 / 0';return}items.forEach(({record})=>grid.append(makeStamp(record,{community:true})));updateCarouselPage('encounter-grid');renderEncounter(items[0].record)}
+function renderEncounter(record){const data=constellationData[record.species]||constellationData['其他'],encounter=state.encounters.find(item=>item.recordId===record.id);if(!encounter)return;const note=document.getElementById('encounter-note');note.querySelector('span').textContent=`TONIGHT · ${data.group} · ${formatEncounterDate(encounter.lastSeenAt)}`;note.querySelector('h3').textContent=`${record.name} · ${record.breed}`;note.querySelector('p').textContent=`${record.memory} “${record.words}” · 已遇见 ${encounter.visitCount} 次`;const searchButton=document.getElementById('encounter-search');searchButton.hidden=false;searchButton.dataset.recordId=record.id;document.querySelectorAll('#encounter-grid .star-entry').forEach(b=>b.classList.toggle('is-current',b.dataset.recordId===record.id))}
 document.getElementById('encounter-search').addEventListener('click',e=>{activateRecord(e.currentTarget.dataset.recordId);show('search')});
 function selectJournalTab(name){
   const mine=name==='mine';document.getElementById('tab-mine').classList.toggle('is-active',mine);document.getElementById('tab-encounters').classList.toggle('is-active',!mine);
@@ -166,7 +172,7 @@ document.getElementById('tab-encounters').addEventListener('click',()=>selectJou
 let journalReturn='home',resumeSearch=false,journalRecord=null;
 function show(id){
   if(id==='journal'){const from=document.querySelector('.view.is-active:not(.is-leaving)');if(from&&from.id!=='journal'){journalReturn=from.id;journalRecord=state.activeId;}document.getElementById('journal').classList.toggle('journal-drawer',journalReturn==='search');document.getElementById('scope-journal').setAttribute('aria-expanded','true')}
-  if(id==='world'){const record=currentRecord();if(state.records.includes(record)&&!record.found){record.found=true;saveRecords()}selectWorldTab('about');document.getElementById('farewell').classList.remove('show')}
+  if(id==='world'){const record=currentRecord();if(state.records.includes(record)&&!record.found){record.found=true;saveRecords()}recordEncounter(record);selectWorldTab('about');document.getElementById('farewell').classList.remove('show')}
   if(id!=='journal')document.getElementById('scope-journal').setAttribute('aria-expanded','false');
   const active=document.querySelector('.journal-drawer.is-active:not(.is-leaving)')||[...document.querySelectorAll('.view.is-active:not(.is-leaving)')].at(-1);
   if(active&&active.id===id)return;
@@ -241,10 +247,10 @@ const storageDialog=document.getElementById('storage-dialog');
 document.querySelectorAll('[data-open-storage]').forEach(b=>b.onclick=()=>{document.getElementById('storage-status').textContent='';storageDialog.showModal()});
 document.querySelectorAll('[data-close-dialog]').forEach(b=>b.onclick=()=>document.getElementById(b.dataset.closeDialog).close());
 function downloadFile(blob,name){const url=URL.createObjectURL(blob),a=document.createElement('a');a.href=url;a.download=name;document.body.append(a);a.click();a.remove();setTimeout(()=>URL.revokeObjectURL(url),30000)}
-document.getElementById('export-notebook').onclick=()=>{try{const records=loadRecords();const backup=NotebookData.exportRecords(records);downloadFile(new Blob([JSON.stringify(backup)],{type:'application/json'}),'群星之间-完整手册-'+new Date().toISOString().slice(0,10)+'.json');document.getElementById('storage-status').textContent='已生成备份，请确认文件已保存到下载目录。'}catch(err){document.getElementById('storage-status').textContent=err.message}};
-document.getElementById('import-notebook').onchange=async e=>{const file=e.target.files?.[0];if(!file)return;try{if(file.size>25*1024*1024)throw Error('备份超过25 MB，请检查是否选对文件。');pendingImport=NotebookData.parseBackup(await file.text());document.getElementById('import-summary').textContent=`找到 ${pendingImport.length} 颗星球，包含照片、布置与已保存的信件。同一颗星球若有不同版本，将保留为副本。`;document.getElementById('import-review').hidden=false;document.getElementById('storage-status').textContent='请确认后恢复。'}catch(err){pendingImport=null;document.getElementById('import-review').hidden=true;document.getElementById('storage-status').textContent=err.message}finally{e.target.value=''}};
+document.getElementById('export-notebook').onclick=()=>{try{const backup=NotebookData.exportNotebook(loadRecords(),loadEncounters());downloadFile(new Blob([JSON.stringify(backup)],{type:'application/json'}),'群星之间-完整手册-'+new Date().toISOString().slice(0,10)+'.json');document.getElementById('storage-status').textContent='已生成备份，请确认文件已保存到下载目录。'}catch(err){document.getElementById('storage-status').textContent=err.message}};
+document.getElementById('import-notebook').onchange=async e=>{const file=e.target.files?.[0];if(!file)return;try{if(file.size>25*1024*1024)throw Error('备份超过25 MB，请检查是否选对文件。');pendingImport=NotebookData.parseNotebook(await file.text());document.getElementById('import-summary').textContent=`找到 ${pendingImport.records.length} 颗星球和 ${pendingImport.encounters.length} 条偶遇记录，包含照片、布置与已保存的信件。同一颗星球若有不同版本，将保留为副本。`;document.getElementById('import-review').hidden=false;document.getElementById('storage-status').textContent='请确认后恢复。'}catch(err){pendingImport=null;document.getElementById('import-review').hidden=true;document.getElementById('storage-status').textContent=err.message}finally{e.target.value=''}};
 document.getElementById('cancel-import').onclick=()=>{pendingImport=null;document.getElementById('import-review').hidden=true};
-document.getElementById('confirm-import').onclick=()=>{if(!pendingImport)return;try{const merged=NotebookData.mergeRecords(loadRecords(),pendingImport);localStorage.setItem(storageKey,JSON.stringify(merged));state.records=normalizeRecords(merged);state.activeId=state.records.at(-1)?.id||communityRecords[0].id;thumbnailCache.clear();pendingImport=null;document.getElementById('import-review').hidden=true;updateIdentity();renderJournal();document.getElementById('storage-status').textContent='恢复完成，现有星球也已保留。'}catch(err){document.getElementById('storage-status').textContent=err.name==='QuotaExceededError'?'此浏览器空间不足，原有记录未更改。可在空间更充足的浏览器恢复。':err.message}};
+document.getElementById('confirm-import').onclick=()=>{if(!pendingImport)return;const oldRecords=localStorage.getItem(storageKey),oldEncounters=localStorage.getItem(encounterKey);try{const merged=NotebookData.mergeRecords(loadRecords(),pendingImport.records),knownIds=new Set(communityRecords.map(record=>record.id)),mergedEncounters=NotebookData.mergeEncounters(loadEncounters(),pendingImport.encounters.filter(item=>knownIds.has(item.recordId)));localStorage.setItem(storageKey,JSON.stringify(merged));localStorage.setItem(encounterKey,JSON.stringify(mergedEncounters));state.records=normalizeRecords(merged);state.encounters=mergedEncounters;state.activeId=state.records.at(-1)?.id||communityRecords[0].id;thumbnailCache.clear();pendingImport=null;document.getElementById('import-review').hidden=true;updateIdentity();renderJournal();renderEncounters();document.getElementById('storage-status').textContent='恢复完成，现有星球和偶遇记录都已保留。'}catch(err){try{if(oldRecords===null)localStorage.removeItem(storageKey);else localStorage.setItem(storageKey,oldRecords);if(oldEncounters===null)localStorage.removeItem(encounterKey);else localStorage.setItem(encounterKey,oldEncounters)}catch{}document.getElementById('storage-status').textContent=err.name==='QuotaExceededError'?'此浏览器空间不足，原有记录未更改。可在空间更充足的浏览器恢复。':err.message}};
 document.getElementById('copy-tool-link').onclick=async()=>{const url=new URL('./',location.href).href;try{await navigator.clipboard.writeText(url);document.getElementById('storage-status').textContent='工具链接已复制；不会包含你的个人记录。'}catch{const input=document.getElementById('tool-link-fallback');input.hidden=false;input.value=url;input.focus();input.select();document.getElementById('storage-status').textContent='请长按或复制下方链接。'}};
 function wrapShareText(ctx,text,x,y,width,lineHeight,maxLines){let line='',lines=[];for(const char of text){if(char==='\n'||ctx.measureText(line+char).width>width){lines.push(line);line=char==='\n'?'':char}else line+=char}if(line)lines.push(line);const truncated=lines.length>maxLines;lines=lines.slice(0,maxLines);if(truncated)lines[lines.length-1]=lines.at(-1).slice(0,-1)+'…';lines.forEach((t,i)=>ctx.fillText(t,x,y+i*lineHeight));}
 let shareRecord=null;
@@ -304,9 +310,9 @@ document.querySelectorAll('[data-world-tab]').forEach(b=>b.onclick=()=>selectWor
 function updateCarouselPage(id){const list=document.getElementById(id);if(!list)return;const step=list.firstElementChild?.getBoundingClientRect().width+14||1;const page=Math.min(list.children.length,Math.round(list.scrollLeft/step)+1);document.getElementById(id==='star-list'?'mine-page':'encounter-page').textContent=`${page} / ${list.children.length}`}
 document.querySelectorAll('[data-slide]').forEach(b=>b.onclick=()=>{const list=document.getElementById(b.dataset.list);list.scrollBy({left:((list.firstElementChild?.getBoundingClientRect().width||0)+14)*Number(b.dataset.slide),behavior:'smooth'})});
 ['star-list','encounter-grid'].forEach(id=>{const list=document.getElementById(id);list.addEventListener('scroll',()=>updateCarouselPage(id));list.addEventListener('keydown',e=>{if(e.key==='ArrowLeft'||e.key==='ArrowRight'){e.preventDefault();list.scrollBy({left:(e.key==='ArrowLeft'?-1:1)*((list.firstElementChild?.getBoundingClientRect().width||0)+14),behavior:'smooth'})}})});
-window.addEventListener('storage',e=>{if(e.key===storageKey){state.records=loadRecords();updateIdentity();renderJournal()}});
+window.addEventListener('storage',e=>{if(e.key===storageKey){state.records=loadRecords();updateIdentity();renderJournal()}if(e.key===encounterKey){state.encounters=loadEncounters();renderEncounters()}});
 
-window.addEventListener('pageshow',()=>{state.records=loadRecords();updateIdentity();renderJournal()});
+window.addEventListener('pageshow',()=>{state.records=loadRecords();state.encounters=loadEncounters();updateIdentity();renderJournal();renderEncounters()});
 
 const returnParams=new URLSearchParams(location.search);
 
