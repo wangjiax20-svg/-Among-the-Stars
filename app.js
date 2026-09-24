@@ -126,7 +126,7 @@ function updateIdentity(){
 
 function activateRecord(id){state.activeId=id;updateIdentity();renderJournal()}
 function activateNextRecord(){const records=allSearchRecords();const currentIndex=Math.max(0,records.findIndex(record=>record.id===state.activeId));const next=records[(currentIndex+1)%records.length];activateRecord(next.id)}
-function searchNextRecord(){resumeSearch=true;show('search')}
+function continueObservation(){activateNextRecord();resumeSearch=false;show('search')}
 function applySticker(el,record){
   if(record.doodle){el.className='star-avatar doodle-avatar';el.style.backgroundImage=`url('${record.doodle}')`;return}
   if(record.avatar){el.style.backgroundImage=`url("${record.avatar}")`;el.className='star-avatar';return}
@@ -233,7 +233,7 @@ function pointerMove(e){if(!state.dragging||state.focused)return;state.x=clamp(e
 function pointerEnd(){if(!state.dragging)return;state.dragging=false;searchView.classList.remove('is-dragging');if(targetInLens())focusTarget()}
 sky.addEventListener('pointerdown',pointerStart);sky.addEventListener('pointermove',pointerMove);sky.addEventListener('pointerup',pointerEnd);sky.addEventListener('pointercancel',pointerEnd);
 target.addEventListener('click',e=>{e.stopPropagation();if(!state.focused){if(targetInLens())focusTarget();else document.getElementById('search-note').textContent='先把这颗星星移进圆形视野。';return}if(performance.now()-state.justFocused>650)show('world')});
-document.getElementById('search-more').addEventListener('click',searchNextRecord);
+document.getElementById('search-more').addEventListener('click',continueObservation);
 
 // Guest-first storage. No simulated account or authentication claims.
 let pendingImport=null;
@@ -268,7 +268,7 @@ document.getElementById('leave-world').addEventListener('click',()=>{
  document.getElementById('farewell-note').textContent=own?'但我知道怎样再次找到TA。':'记得常来看看我。';
  document.getElementById('farewell').classList.add('show');
 });
-function returnToSky(){document.getElementById('farewell').classList.remove('show');resumeSearch=true;show('search')}
+function returnToSky(){document.getElementById('farewell').classList.remove('show');continueObservation()}
 document.getElementById('farewell-search').onclick=returnToSky;
 document.getElementById('farewell-journal').onclick=()=>{document.getElementById('farewell').classList.remove('show');show('journal')};
 document.getElementById('scope-journal').onclick=()=>show('journal');
