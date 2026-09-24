@@ -1,0 +1,185 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
+  <meta name="theme-color" content="#07101d" />
+  <meta name="description" content="群星之间——一个以星空寻找为核心隐喻的数字宠物纪念空间。" />
+  <title>群星之间 · Among the Stars</title>
+  <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Crect width='64' height='64' rx='14' fill='%2307101d'/%3E%3Cpath d='M32 10l3.8 18.2L54 32l-18.2 3.8L32 54l-3.8-18.2L10 32l18.2-3.8z' fill='%23d6ba78'/%3E%3C/svg%3E" />
+  <link rel="stylesheet" href="./styles.css" />
+</head>
+<body>
+  <main class="phone" aria-live="polite">
+    <section class="view view--night is-active" id="home" aria-labelledby="home-title">
+      <div class="night-image slow-drift"></div>
+      <button class="notebook-link" data-go="journal" aria-label="打开观星手册">观星手册 <span>✦</span></button>
+      <div class="home-copy">
+        <p class="eyebrow">AMONG THE STARS · 群星之间</p>
+        <h1 id="home-title">想念的时候，<br />请在星空中寻找我。</h1>
+        <p class="home-sub">每一个小生命离开以后，<br />都会成为群星中的一颗。</p>
+      </div>
+      <div class="home-actions">
+        <button class="btn btn--gold" data-go="create">为 TA 创建一颗星星</button>
+        <button class="btn btn--ghost" data-go="journal">去寻找一颗星星</button>
+      </div>
+    </section>
+
+    <section class="view view--paper" id="create" aria-labelledby="create-title">
+      <header class="paper-head">
+        <button class="icon-btn" data-go="home" aria-label="返回首页">←</button>
+        <span class="folio">1 / 3 · 认识TA</span>
+      </header>
+      <div class="paper-scroll">
+        <p class="ink-star">✦</p>
+        <h2 id="create-title">认识TA</h2>
+        <p class="paper-intro">告诉我们一些关于 TA 的事情吧。</p>
+        <form id="star-form">
+          <label>TA 叫什么名字？<input name="name" placeholder="例如：俊宝" required /></label>
+          <fieldset>
+            <legend>TA 是怎样的小生命？</legend>
+            <div class="chips" role="radiogroup">
+              <label><input type="radio" name="species" value="鸟" checked /><span>鸟</span></label>
+              <label><input type="radio" name="species" value="猫" /><span>猫</span></label>
+              <label><input type="radio" name="species" value="狗" /><span>狗</span></label>
+              <label><input type="radio" name="species" value="兔子" /><span>兔子</span></label>
+              <label><input type="radio" name="species" value="仓鼠" /><span>仓鼠</span></label>
+              <label><input type="radio" name="species" value="鱼" /><span>鱼</span></label>
+              <label><input type="radio" name="species" value="其他" /><span>其他</span></label>
+            </div>
+          </fieldset>
+          <label>如果愿意，可以再告诉我们 TA 的品种<input name="breed" placeholder="选填，例如：玄凤鹦鹉" /></label>
+          <label>你最常想起 TA 什么样子？<textarea name="memory" rows="2" placeholder="例如：TA晚上总喜欢站在秋千上睡觉。"></textarea><small>写下一件很小、却总会想起的事。</small></label>
+          <label>有什么话一直想留给 TA？<textarea name="words" rows="2" placeholder="下一次望向夜空的时候，我会记得找你。"></textarea></label>
+          <button id="create-next" class="btn btn--ink" type="submit">下一步 · 布置星球</button>
+        </form>
+      </div>
+    </section>
+
+    <section class="view view--night birth" id="birth" aria-labelledby="birth-title">
+      <div class="night-image"></div>
+      <button class="icon-btn icon-btn--light" data-go="home" aria-label="返回首页">←</button>
+      <div class="birth-star" aria-hidden="true">✦</div>
+      <div class="birth-copy">
+        <p id="birth-title">一颗新的星星亮起来了。</p>
+        <h2 class="pet-name">俊宝</h2>
+        <span class="star-location">鸟星群 · 飞鸟座附近</span>
+        <button class="btn btn--gold" data-go="journal">查看我的观星笔记 →</button>
+        <button class="birth-login" data-open-storage>备份这本手册</button>
+      </div>
+    </section>
+
+    <section class="view view--paper" id="journal" aria-labelledby="journal-title">
+      <header class="paper-head">
+        <button class="icon-btn" id="close-journal" aria-label="收起观星手册">×</button>
+        <span class="folio">FIELD NOTE · 13 SEP</span>
+        <button class="account-button" id="account-button" data-open-storage>保存备份</button>
+      </header>
+      <div class="paper-scroll journal-page">
+        <p class="eyebrow eyebrow--ink">AMONG THE STARS</p>
+        <h2 id="journal-title">观星手册</h2>
+        <div class="journal-tabs" role="tablist" aria-label="观星手册分册">
+          <button class="journal-tab is-active" id="tab-mine" role="tab" aria-selected="true" aria-controls="journal-mine">我的星星</button>
+          <button class="journal-tab" id="tab-encounters" role="tab" aria-selected="false" aria-controls="journal-encounters">今夜所见</button>
+        </div>
+        <section class="journal-section is-active" id="journal-mine" role="tabpanel" aria-labelledby="tab-mine">
+          <p class="collection-note">每一个小世界，都记着怎样再次找到TA。</p>
+          <div id="empty-notebook" hidden><p>这里等着一颗属于TA的星星。</p><button class="btn btn--ink" data-go="create">创建第一颗星球</button><button class="btn btn--paper" data-open-storage>从备份找回星球</button></div><div class="star-list stamp-grid" id="star-list" aria-label="我的星星，左右滑动翻阅" tabindex="0"></div><div class="carousel-nav"><button data-slide="-1" data-list="star-list" aria-label="上一颗星球">←</button><span id="mine-page">1 / 1</span><button data-slide="1" data-list="star-list" aria-label="下一颗星球">→</button></div>
+
+        </section>
+        <section class="journal-section" id="journal-encounters" role="tabpanel" aria-labelledby="tab-encounters" hidden>
+          <p class="collection-note">一些微小的日常，安静地亮在远处。此处为示例星球。</p>
+          <div class="encounter-grid stamp-grid" id="encounter-grid" aria-label="遇见的星星，左右滑动翻阅" tabindex="0"></div><div class="carousel-nav"><button data-slide="-1" data-list="encounter-grid" aria-label="上一颗星球">←</button><span id="encounter-page">1 / 12</span><button data-slide="1" data-list="encounter-grid" aria-label="下一颗星球">→</button></div>
+          <article class="encounter-note" id="encounter-note" aria-live="polite">
+            <span>TONIGHT · 偶遇记录</span>
+            <h3>轻触一枚淡色印记</h3>
+            <p>听听一颗遥远星星愿意分享的小事。</p>
+            <button class="encounter-search" id="encounter-search" hidden>在星空中寻找 TA</button>
+          </article>
+        </section>
+        <section class="field-note" id="personal-field-note">
+          <p class="note-number">寻星笔记 · 01</p>
+          <h3>怎样再次找到TA</h3>
+          <svg class="constellation" id="journal-constellation" viewBox="0 0 100 72" role="img" aria-label="宠物星座简化星图"></svg>
+          <p id="journal-clue-one">先找到像一只展开翅膀的小鸟一样的四颗星。</p>
+          <p id="journal-clue-two">顺着左翼向上寻找。在三颗排成弧形的小星附近，有一颗暖黄色、轻轻闪烁的星。</p>
+          <p class="handwritten">TA就在那里。</p>
+        </section>
+      </div>
+      <div class="journal-actions" aria-label="观星手册操作"><small class="local-note">仅保存在此浏览器 · 可导出完整备份</small>
+        <button id="journal-search" class="btn btn--ink" data-go="search">去寻找TA</button><button id="visit-direct" class="btn btn--paper" hidden>直接探望TA</button>
+        <button class="btn btn--paper" data-go="create">＋ 再为一只宠物创建星星</button>
+      </div>
+    </section>
+
+    <section class="view view--search" id="search" aria-labelledby="search-title">
+      <div class="search-sky" id="search-sky">
+        <div class="star-map" id="star-map" aria-hidden="true"></div>
+        <div class="search-neighbors" id="search-neighbors" aria-label="这片星空中的其他星星"></div>
+        <svg class="animal-constellation" id="animal-constellation" viewBox="0 0 100 82" aria-hidden="true"></svg>
+        <button class="target-star" id="target-star" aria-label="一颗暖黄色、轻轻闪烁的星">✦</button>
+      </div>
+      <header class="search-head">
+        <button class="icon-btn icon-btn--light" data-go="home" aria-label="返回首页">←</button>
+        <p id="search-title">寻找俊宝</p>
+        <button class="hint-button" id="hint-button">线索 1 / 3</button>
+      </header>
+      <div class="lens-ring" aria-hidden="true"><span class="lens-cross">＋</span><span class="lens-caption">望远镜视野</span></div><button class="scope-journal" id="scope-journal" aria-label="打开观星手册" aria-expanded="false"><svg viewBox="0 0 32 32" width="28" height="28" fill="none" stroke="currentColor" stroke-width="1.5" aria-hidden="true"><rect x="6" y="4" width="21" height="25" rx="3"/><path d="M11 4v25M3 10h6M3 17h6M3 24h6M19 10l1.2 3.8 4 .2-3.2 2.4 1 3.8-3-2.3-3.3 2.3 1.1-3.8-3.2-2.4 4-.2z"/></svg></button>
+      <div class="search-note" id="search-note">先找到像一只展开翅膀的小鸟一样的四颗星。</div>
+      <p class="drag-note" id="drag-note">轻轻拖动星空，改变望远镜的方向</p>
+      <p class="focus-label" id="focus-label"><span class="constellation-name">飞鸟座</span> 已被点亮<br /><small>轻触中央的星星，查看详细信息</small></p>
+    </section>
+
+    <section class="view view--night discovered" id="discovered" aria-labelledby="found-title">
+      <div class="night-image zoomed"></div>
+      <button class="icon-btn icon-btn--light" data-go="search" aria-label="返回星空">←</button>
+      <div class="found-card">
+        <p class="eyebrow">FOUND · 001</p>
+        <div class="found-star">✦</div>
+        <p id="found-title">你找到俊宝了。</p>
+        <h2 class="pet-name">俊宝</h2>
+        <span class="star-location">鸟星群 · 飞鸟座附近</span>
+        <blockquote id="found-quote">“下一次望向夜空的时候，<br />我会记得找你。”</blockquote>
+        <button class="btn btn--gold" data-go="world">靠近这颗星星</button>
+        <button class="btn btn--starlight" id="search-more">返回望远镜 · 寻找下一颗星</button>
+      </div>
+    </section>
+
+    <section class="view view--world" id="world" aria-labelledby="world-title">
+      <div class="world-image"></div>
+      <header class="world-head"><span id="world-name">俊宝的小世界</span><button class="close-world" id="leave-world">离开</button></header>
+      <h2 id="world-title" class="sr-only">俊宝的小世界</h2>
+      <article class="planet-card">
+        <div class="planet-stage" aria-hidden="true"><img id="saved-planet" alt="" hidden>
+          <canvas id="planet-canvas" width="520" height="520"></canvas>
+          <span class="planet-soul" id="planet-soul"></span>
+          <div class="planet-charms" id="planet-charms"></div>
+          <div class="planet-pet-sticker" id="planet-pet-sticker" hidden><img alt="" /></div>
+          <span class="planet-orbit-dot"></span>
+        </div>
+        <nav class="planet-tabs" aria-label="星球内容"><button data-world-tab="about" aria-selected="true">✧<small>关于</small></button><button data-world-tab="words" aria-selected="false">♡<small>写给TA</small></button><button data-world-tab="memory" aria-selected="false">≋<small>回忆</small></button><button data-world-tab="photo" aria-selected="false">▧<small>照片</small></button></nav><div class="planet-journal">
+          <p class="planet-kicker">MEMORY WORLD · 发现记录</p>
+          <div class="planet-title-row"><h3 id="planet-name">俊宝星</h3><span id="planet-type">温暖岩质星球</span></div>
+          <p class="planet-description" data-world-panel="about" id="planet-description">一颗保存着细小生活记忆的星球。</p>
+          <div class="planet-memories">
+            <div hidden data-world-panel="memory" class="memory-panel memory-point--swing" data-memory="她以前最喜欢在秋千上睡觉。" aria-label="查看一段生活记忆"><small>生活片段</small><strong id="world-memory">她以前最喜欢在秋千上睡觉。</strong></div>
+            <div hidden data-world-panel="photo" class="memory-panel memory-panel--photo memory-point--two" data-memory="她安静地站在那里，家就变得很完整。" aria-label="查看照片记忆"><canvas class="world-photo-canvas" id="world-photo-canvas" width="420" height="300"></canvas><span class="world-photo" id="world-photo"></span><small id="world-photo-caption">一张留下来的照片</small></div>
+            <div hidden data-world-panel="words" class="memory-panel memory-point--one" data-memory="稳如泰山的鸟妈妈。" aria-label="查看留下的话"><small>留给 TA 的话</small><strong id="world-words"></strong><img id="letter-image" alt="随信留下的照片" hidden><div class="letter-nav"><button id="letter-prev" aria-label="上一封">←</button><span id="letter-date"></span><button id="letter-next" aria-label="下一封">→</button></div><div id="letter-owner"><button id="write-letter">再写几句</button><button id="edit-letter">修改</button><button id="delete-letter">删除</button></div></div>
+          </div>
+          <details id="pet-management"><summary>管理星球 ···</summary><a id="edit-planet" href="./studio.html">布置星球</a><a id="edit-sticker">更换宠物贴纸</a><button id="edit-profile">修改资料</button><button id="share-planet">制作分享图片</button></details>
+        </div>
+      </article>
+      <div class="memory-card" id="memory-card"><button aria-label="关闭记忆">×</button><p></p></div>
+      <div class="farewell" id="farewell"><p id="farewell-title"></p><small id="farewell-note"></small><div class="farewell-actions"><button class="btn btn--starlight" id="farewell-search">继续观星</button><button class="btn btn--starlight" id="farewell-journal">打开观星手册</button></div></div>
+    </section>
+
+    <dialog id="storage-dialog" class="paper-dialog" aria-labelledby="storage-title"><button class="dialog-close" data-close-dialog="storage-dialog" aria-label="关闭">×</button><h2 id="storage-title">把想念好好留住</h2><p>免登录就能使用。星球、照片和信件保存在此浏览器，暂不自动同步到其他设备。</p><p>换设备、清理浏览器或从社媒切换到系统浏览器前，先下载一份完整备份。</p><button id="export-notebook" class="btn btn--ink">下载完整观星手册</button><label class="btn btn--paper import-label">从备份恢复<input id="import-notebook" type="file" accept=".json,application/json" hidden></label><div id="import-review" hidden><p id="import-summary"></p><button id="confirm-import" class="btn btn--ink">确认导入，保留现有记录</button><button id="cancel-import" class="btn btn--paper">取消</button></div><p id="storage-status" role="status"></p><button id="copy-tool-link" class="btn btn--paper">复制工具链接</button><input id="tool-link-fallback" readonly hidden aria-label="工具链接"><small>公开的是这个工具。你的记录不会自动上传；备份文件包含照片与留言，请自己保管。</small></dialog>
+    <dialog id="share-dialog" class="paper-dialog" aria-labelledby="share-title"><button class="dialog-close" data-close-dialog="share-dialog" aria-label="关闭">×</button><h2 id="share-title">把这颗星星带走</h2><canvas id="share-canvas" width="1080" height="1440" aria-label="分享图片预览"></canvas><label class="share-words"><input id="share-include-words" type="checkbox">附上最初留给TA的一句话</label><div class="share-actions"><button id="download-share" class="btn btn--ink">保存图片</button><button id="native-share" class="btn btn--paper">分享图片</button></div><p id="share-status" role="status">图片包含星球和名字，不包含其他信件。</p></dialog>
+    <dialog id="letter-dialog"><form id="letter-form"><div class="letter-heading"><label for="letter-text">今天想告诉TA什么？</label><button type="button" id="close-letter" aria-label="收起纸条">×</button></div><textarea id="letter-text" rows="2" maxlength="4000" placeholder="一句话也很好。"></textarea><div class="letter-compose-actions"><label class="attach-letter" aria-label="添加照片">＋照片<input id="letter-photo" type="file" accept="image/*" hidden></label><button type="button" id="clear-letter-photo" hidden>移除照片</button><button type="submit">留下这句话</button></div><p id="letter-status" role="status"></p></form></dialog>
+    <dialog id="delete-letter-dialog"><p>删除这封信？其他信件会保留。</p><button id="cancel-delete-letter">保留</button><button id="confirm-delete-letter">删除这封信</button></dialog>
+  </main>
+  <script src="./collage-planet.js"></script>
+  <script src="./pet-stickers.js"></script><script src="./notebook-data.js"></script><script src="./app.js"></script>
+  <script type="module" src="./vendor/sticker-forge.es.js"></script>
+</body>
+</html>

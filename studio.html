@@ -1,0 +1,33 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+  <meta name="theme-color" content="#101c28"><title>星球手作室 · 群星之间</title>
+  <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Ccircle cx='32' cy='32' r='19' fill='%23b8ad83'/%3E%3Cellipse cx='32' cy='32' rx='30' ry='10' fill='none' stroke='%23788872' stroke-width='3' transform='rotate(-25 32 32)'/%3E%3C/svg%3E">
+  <link rel="stylesheet" href="./studio.css">
+</head>
+<body>
+  <header class="studio-head legacy-head" hidden><a href="./" class="brand" aria-label="返回群星之间">✦ <span>群星之间<small>AMONG THE STARS</small></span></a><span class="head-note">为那些小小的日常，留一处地方。</span><button id="open-project" class="text-button">打开作品</button></header>
+  <header class="flow-head"><button id="flow-back">← 返回</button><div><small id="flow-count">2 / 3</small><h1 id="flow-title">布置星球</h1></div><span aria-hidden="true">✦</span></header><main class="workshop">
+    <section class="observatory" aria-label="星球预览">
+      <div class="scene-title" hidden><p class="eyebrow">A LITTLE WORLD, BY YOU</p><label for="world-name">给这颗星球起个名字</label><input id="world-name" maxlength="24" value="一处有风的小世界" aria-label="星球名字"></div>
+      <div class="canvas-wrap"><canvas id="world-canvas" width="900" height="900" aria-label="星球画布：选择地表后点按涂色，选择物件后点按放置；在移动模式中拖动物件">请使用支持 Canvas 的浏览器打开星球手作室。</canvas><span id="loading" role="status">正在铺开纸张与颜色…</span></div>
+      <div class="scene-footer"><span id="mode-note">选一种地表，轻轻涂在星球上。</span><div class="scene-tools"><button id="undo" aria-label="撤销上一步" title="撤销上一步">↶</button><button id="redo" aria-label="重做" title="重做">↷</button><button id="grid" aria-pressed="false">地块</button><button id="move" aria-pressed="false">移动</button></div></div>
+    </section>
+    <aside class="notebook" aria-label="星球编辑工具">
+      <div class="notebook-heading" hidden><span class="eyebrow">FIELD NOTES / 01</span><h1>星球手作室</h1><p>铺一片草地，安放一点回忆。</p></div>
+      <nav class="tabs" aria-label="编辑步骤"><button data-tab="terrain" class="active" aria-pressed="true">地表</button><button data-tab="objects" aria-pressed="false">装饰</button><button data-tab="rings" aria-pressed="false">星环</button></nav>
+      <div class="panel-scroll">
+        <section id="panel-terrain" class="panel"><div class="section-title"><h2>从一个小世界开始</h2><span>初始模板</span></div><div id="templates" class="template-list"></div><div class="section-title"><h2>给地表一些颜色</h2></div><div id="palettes" class="palette-list"></div><div class="section-title"><h2>铺上喜欢的材质</h2><span>点选 · 涂抹</span></div><div id="materials" class="material-list"></div><button id="regenerate" class="outline wide">✧ 换一个地貌</button><p class="fine-print">只改变地表布局，已安放的小物件会留在原处。</p></section>
+        <section id="panel-objects" class="panel" hidden><div class="section-title"><h2>那些熟悉的小东西</h2><span>选好后点星球</span></div><div id="objects" class="object-list"></div><p class="fine-print">小物件会贴合球面。切换「移动」后，点选或拖动它们。</p><div id="selection-controls" class="selection-controls" hidden><p id="selected-name"></p><label>大小<input id="object-size" type="range" min="65" max="145" value="100"></label><label>倾斜<input id="object-angle" type="range" min="-25" max="25" value="0"></label><div class="nudge" aria-label="微调位置"><button data-nudge="-8,0" aria-label="左移">←</button><button data-nudge="0,-8" aria-label="上移">↑</button><button data-nudge="0,8" aria-label="下移">↓</button><button data-nudge="8,0" aria-label="右移">→</button><button id="delete-object">移走</button></div></div></section>
+        <section id="panel-rings" class="panel" hidden><div class="section-title"><h2>为星球戴上星环</h2></div><div id="rings" class="ring-list"></div><div id="ring-controls" hidden><label>颜色<input id="ring-color" type="color" value="#dec58f"></label><label>倾斜<input id="ring-angle" type="range" min="-45" max="45" value="-18"></label><label>宽度<input id="ring-width" type="range" min="5" max="38" value="18"></label></div></section><section id="panel-memory" class="panel" hidden><div class="section-title"><h2>把一个瞬间贴在星球上</h2></div><p class="panel-copy">上传照片或透明贴纸，保留TA的模样。也可以以后再添加。</p><label class="photo-upload" for="photo-input"><span id="photo-preview">＋<small>选择一张照片</small></span><input id="photo-input" type="file" accept="image/*" hidden></label><div class="sticker-actions"><button id="cutout-photo" class="outline">自动抠出宠物</button><button id="crop-photo" class="outline">调整裁切</button><button id="restore-photo" class="text-button">恢复原图</button></div><p id="sticker-status" class="fine-print" role="status">透明图片会保留轮廓；普通照片可自动抠图。</p><div hidden><label class="caption-label" for="photo-caption">照片旁的一句话</label><textarea id="photo-caption" maxlength="160" placeholder="比如：TA以前最喜欢在这里睡觉。"></textarea></div><button id="place-photo" class="outline wide">在星球上放一枚贴纸</button><button id="remove-photo" class="text-button">移除贴纸</button><button hidden id="view-photo" class="text-button photo-view">查看照片与留言</button><p class="fine-print">在「移动」模式下点两下贴纸，也可以靠近查看。</p></section>
+      </div>
+      <footer class="notebook-footer"><details class="file-menu"><summary>备份与导出 ···</summary><button id="open-backup">打开作品文件</button><button id="backup-project">下载作品文件</button><button id="backup-image">导出星球图片</button></details><div class="flow-actions"><button id="flow-skip" class="outline" hidden>暂时跳过</button><button id="flow-next" class="primary">下一步 · 添加贴纸</button></div><div class="save-actions" hidden><button id="save-project" class="primary">保存作品</button><button id="export-image" class="outline">导出图片</button></div><p id="save-status" role="status">草稿留在此设备 · 保存作品可下载可编辑文件</p></footer>
+    </aside>
+  </main>
+  <input id="project-input" type="file" accept=".json,application/json" hidden>
+  <dialog id="photo-dialog" aria-label="照片记忆"><button id="close-photo" aria-label="关闭照片">×</button><img id="large-photo" alt="留在星球上的照片"><p id="large-caption"></p></dialog>
+  <dialog id="template-dialog"><h2>换一个起点？</h2><p>地表和小物件将换成新模板，你上传的照片会保留。也可以用撤销找回当前布置。</p><div><button id="cancel-template" class="outline">继续布置</button><button id="confirm-template" class="primary">使用模板</button></div></dialog>
+  <script src="./collage-planet.js"></script><script src="./pet-stickers.js"></script><script src="./studio.js"></script>
+</body>
+</html>
